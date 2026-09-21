@@ -32,6 +32,7 @@ export default function App() {
   const [showHistory, setShowHistory] = useState(true);
   const [showVisualizer, setShowVisualizer] = useState(true);
   const [showDebug, setShowDebug] = useState(true);
+  const [analyzeAudio, setAnalyzeAudio] = useState(true);
 
   const stageRef = useRef<HTMLDivElement | null>(null);
 
@@ -41,8 +42,8 @@ export default function App() {
   const handleStart = useCallback(() => {
     if (!recognition.supported) return;
     recognition.start();
-    void microphone.start();
-  }, [microphone, recognition]);
+    if (analyzeAudio) void microphone.start();
+  }, [microphone, recognition, analyzeAudio]);
 
   const handleStop = useCallback(() => {
     recognition.stop();
@@ -96,10 +97,15 @@ export default function App() {
           onShowVisualizerChange={setShowVisualizer}
           showDebug={showDebug}
           onShowDebugChange={setShowDebug}
+          analyzeAudio={analyzeAudio}
+          onAnalyzeAudioChange={setAnalyzeAudio}
+          micLabel={microphone.deviceLabel}
         />
       </header>
 
       {alertMessage ? <div className="alert">{alertMessage}</div> : null}
+
+      {recognition.hint ? <div className="notice">{recognition.hint}</div> : null}
 
       {showDebug ? (
         <RecognitionLog
@@ -107,6 +113,7 @@ export default function App() {
           status={recognition.status}
           supported={recognition.supported}
           restarts={recognition.restarts}
+          micLabel={microphone.deviceLabel}
           onClose={() => setShowDebug(false)}
         />
       ) : null}

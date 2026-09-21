@@ -7,6 +7,7 @@ export interface MicrophoneState {
   error: string | null;
   volume: number;
   analyser: AnalyserNode | null;
+  deviceLabel: string | null;
   start: () => Promise<void>;
   stop: () => void;
 }
@@ -27,6 +28,7 @@ export function useMicrophone(): MicrophoneState {
   const [error, setError] = useState<string | null>(null);
   const [volume, setVolume] = useState(0);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
+  const [deviceLabel, setDeviceLabel] = useState<string | null>(null);
 
   const contextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -47,6 +49,7 @@ export function useMicrophone(): MicrophoneState {
       void context.close();
     }
     setAnalyser(null);
+    setDeviceLabel(null);
     setVolume(0);
     setStatus("idle");
   }, []);
@@ -84,6 +87,7 @@ export function useMicrophone(): MicrophoneState {
       }
 
       streamRef.current = stream;
+      setDeviceLabel(stream.getAudioTracks()[0]?.label || null);
       const context = new Ctor();
       if (context.state === "suspended") {
         await context.resume();
@@ -133,5 +137,5 @@ export function useMicrophone(): MicrophoneState {
 
   useEffect(() => () => stop(), [stop]);
 
-  return { status, error, volume, analyser, start, stop };
+  return { status, error, volume, analyser, deviceLabel, start, stop };
 }

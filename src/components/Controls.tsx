@@ -26,6 +26,9 @@ interface ControlsProps {
   onShowVisualizerChange: (value: boolean) => void;
   showDebug: boolean;
   onShowDebugChange: (value: boolean) => void;
+  analyzeAudio: boolean;
+  onAnalyzeAudioChange: (value: boolean) => void;
+  micLabel: string | null;
 }
 
 const MIC_LABEL: Record<MicrophoneStatus, string> = {
@@ -56,6 +59,9 @@ export function Controls({
   onShowVisualizerChange,
   showDebug,
   onShowDebugChange,
+  analyzeAudio,
+  onAnalyzeAudioChange,
+  micLabel,
 }: ControlsProps) {
   return (
     <div className="controls">
@@ -72,7 +78,9 @@ export function Controls({
         クリア
       </button>
 
-      <span className={`badge badge-${micStatus}`}>{MIC_LABEL[micStatus]}</span>
+      <span className={`badge badge-${micStatus}`} title={micLabel ?? undefined}>
+        {MIC_LABEL[micStatus]}
+      </span>
 
       <label className="field">
         <span className="field-label">言語</span>
@@ -128,6 +136,15 @@ export function Controls({
           onChange={(event) => onShowVisualizerChange(event.target.checked)}
         />
         <span>波形</span>
+      </label>
+
+      <label className="toggle">
+        <input
+          type="checkbox"
+          checked={analyzeAudio}
+          onChange={(event) => onAnalyzeAudioChange(event.target.checked)}
+        />
+        <span>波形解析（オフで認識のみ）</span>
       </label>
 
       <label className="toggle">

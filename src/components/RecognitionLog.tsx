@@ -9,6 +9,7 @@ interface RecognitionLogProps {
   status: RecognitionStatus;
   supported: boolean;
   restarts: number;
+  micLabel: string | null;
   onClose: () => void;
 }
 
@@ -33,6 +34,7 @@ export function RecognitionLog({
   status,
   supported,
   restarts,
+  micLabel,
   onClose,
 }: RecognitionLogProps) {
   const endRef = useRef<HTMLDivElement | null>(null);
@@ -47,6 +49,7 @@ export function RecognitionLog({
         <strong>音声認識ログ</strong>
         <span className="diagnostics-meta">
           対応: {supported ? "あり" : "なし"} / 状態: {status} / 再起動: {restarts} 回
+          {micLabel ? ` / 入力: ${micLabel}` : ""}
         </span>
         <button type="button" className="btn" onClick={onClose}>
           閉じる

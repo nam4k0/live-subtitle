@@ -25,6 +25,7 @@ export interface SpeechRecognitionState {
   supported: boolean;
   status: RecognitionStatus;
   error: string | null;
+  hint: string | null;
   captions: Caption[];
   interim: string;
   log: RecognitionLogEntry[];
@@ -41,6 +42,7 @@ const RESTART_DELAY = 400;
 const START_TIMEOUT = 6000;
 const QUICK_END_MS = 600;
 const MAX_QUICK_ENDS = 4;
+const NO_RESULT_HINT_AT = 3;
 
 function createId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -53,6 +55,7 @@ export function useSpeechRecognition(lang: string): SpeechRecognitionState {
   const [supported] = useState(() => getSpeechRecognitionCtor() !== null);
   const [status, setStatus] = useState<RecognitionStatus>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
   const [captions, setCaptions] = useState<Caption[]>([]);
   const [interim, setInterim] = useState("");
   const [log, setLog] = useState<RecognitionLogEntry[]>([]);
@@ -64,6 +67,8 @@ export function useSpeechRecognition(lang: string): SpeechRecognitionState {
   const startTimerRef = useRef<number | null>(null);
   const lastStartAtRef = useRef(0);
   const quickEndsRef = useRef(0);
+  const hadResultRef = useRef(false);
+  const noResultRef = useRef(0);
   const langRef = useRef(lang);
   langRef.current = lang;
 
@@ -101,6 +106,7 @@ export function useSpeechRecognition(lang: string): SpeechRecognitionState {
     recognition.onstart = () => {
       lastStartAtRef.current = performance.now();
       quickEndsRef.current = 0;
+      hadResultRef.current = false;
       clearStartTimer();
       setStatus("listening");
       setError(null);
@@ -108,6 +114,9 @@ export function useSpeechRecognition(lang: string): SpeechRecognitionState {
     };
 
     recognition.onresult = (event) => {
+      hadResultRef.current = true;
+      noResultRef.current = 0;
+      setHint(null);
       let pending = "";
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
         const result = event.results[i];
@@ -163,6 +172,19 @@ export function useSpeechRecognition(lang: string): SpeechRecognitionState {
         "end",
         elapsed >= 0 ? `開始から ${elapsed}ms で終了` : "onstart 前に終了",
       );
+
+      if (hadResultRef.current) {
+        noResultRef.current = 0;
+      } else {
+        noResultRef.current += 1;
+        if (noResultRef.current >= NO_RESULT_HINT_AT) {
+          setHint(
+            "開始と終了だけが繰り返され、認識結果が一度も返っていません。マイク音声が認識エンジンに届いていない可能性があります。",
+          );
+          pushLog("info", "認識結果が得られないセッションが続いています");
+        }
+      }
+      hadResultRef.current = false;
 
       if (!shouldRunRef.current) {
         setStatus((prev) => (prev === "error" ? prev : "idle"));
@@ -236,7 +258,10 @@ export function useSpeechRecognition(lang: string): SpeechRecognitionState {
     shouldRunRef.current = true;
     lastStartAtRef.current = 0;
     quickEndsRef.current = 0;
+    hadResultRef.current = false;
+    noResultRef.current = 0;
     setError(null);
+    setHint(null);
     setStatus("starting");
     pushLog("info", "音声認識を開始します");
 
@@ -290,6 +315,7 @@ export function useSpeechRecognition(lang: string): SpeechRecognitionState {
     supported,
     status,
     error,
+    hint,
     captions,
     interim,
     log,
