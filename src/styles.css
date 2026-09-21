@@ -190,6 +190,122 @@ body {
   border-radius: 10px;
 }
 
+.badge {
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.badge-running {
+  color: #a7f3d0;
+  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(16, 185, 129, 0.14);
+}
+
+.badge-error {
+  color: #fecdd3;
+  border-color: rgba(251, 113, 133, 0.4);
+  background: rgba(244, 63, 94, 0.16);
+}
+
+.diagnostics {
+  max-height: 30vh;
+  padding: 10px 14px;
+  overflow-y: auto;
+  font-size: 0.74rem;
+  background: rgba(2, 6, 16, 0.72);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.diagnostics-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  position: sticky;
+  top: -10px;
+  padding: 6px 0;
+  background: rgba(2, 6, 16, 0.95);
+}
+
+.diagnostics-head strong {
+  font-size: 0.8rem;
+}
+
+.diagnostics-meta {
+  color: var(--muted);
+}
+
+.diagnostics-head .btn {
+  margin-left: auto;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+}
+
+.diagnostics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.diagnostics-list li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.diagnostics-list time {
+  color: #64748b;
+  flex: none;
+}
+
+.tag {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.66rem;
+  background: rgba(148, 163, 184, 0.16);
+}
+
+.tag-start {
+  color: #a7f3d0;
+  background: rgba(16, 185, 129, 0.18);
+}
+
+.tag-result {
+  color: #bae6fd;
+  background: rgba(56, 189, 248, 0.18);
+}
+
+.tag-end {
+  color: #cbd5f5;
+  background: rgba(129, 140, 248, 0.18);
+}
+
+.tag-error {
+  color: #fecdd3;
+  background: rgba(244, 63, 94, 0.2);
+}
+
+.diagnostics-detail {
+  color: #cbd5e1;
+  overflow-wrap: anywhere;
+}
+
+.diagnostics-empty {
+  color: var(--muted);
+}
+
 .stage {
   display: flex;
   flex: 1;

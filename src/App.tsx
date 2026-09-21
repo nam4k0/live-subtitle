@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { Controls, type LanguageOption } from "./components/Controls";
+import { RecognitionLog } from "./components/RecognitionLog";
 import { SubtitleView } from "./components/SubtitleView";
 import { Visualizer } from "./components/Visualizer";
 import { VolumeMeter } from "./components/VolumeMeter";
@@ -30,15 +31,17 @@ export default function App() {
   const [autoScroll, setAutoScroll] = useState(true);
   const [showHistory, setShowHistory] = useState(true);
   const [showVisualizer, setShowVisualizer] = useState(true);
+  const [showDebug, setShowDebug] = useState(true);
 
   const stageRef = useRef<HTMLDivElement | null>(null);
 
-  const listening = recognition.status === "listening";
+  const running =
+    recognition.status === "starting" || recognition.status === "listening";
 
-  const handleStart = useCallback(async () => {
+  const handleStart = useCallback(() => {
     if (!recognition.supported) return;
-    await microphone.start();
     recognition.start();
+    void microphone.start();
   }, [microphone, recognition]);
 
   const handleStop = useCallback(() => {
@@ -68,13 +71,13 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <div className="brand">
-          <span className={`status-dot${listening ? " is-live" : ""}`} aria-hidden="true" />
+          <span className={`status-dot${running ? " is-live" : ""}`} aria-hidden="true" />
           <span className="brand-name">Live Subtitle</span>
           <span className="brand-sub">Web Audio API リアルタイム字幕</span>
         </div>
         <Controls
           supported={recognition.supported}
-          listening={listening}
+          running={running}
           micStatus={microphone.status}
           languages={LANGUAGES}
           lang={lang}
@@ -91,10 +94,22 @@ export default function App() {
           onShowHistoryChange={setShowHistory}
           showVisualizer={showVisualizer}
           onShowVisualizerChange={setShowVisualizer}
+          showDebug={showDebug}
+          onShowDebugChange={setShowDebug}
         />
       </header>
 
       {alertMessage ? <div className="alert">{alertMessage}</div> : null}
+
+      {showDebug ? (
+        <RecognitionLog
+          log={recognition.log}
+          status={recognition.status}
+          supported={recognition.supported}
+          restarts={recognition.restarts}
+          onClose={() => setShowDebug(false)}
+        />
+      ) : null}
 
       <main className="stage" ref={stageRef}>
         <SubtitleView
@@ -103,7 +118,7 @@ export default function App() {
           fontSize={fontSize}
           autoScroll={autoScroll}
           showHistory={showHistory}
-          listening={listening}
+          listening={running}
         />
 
         <div className="dock">

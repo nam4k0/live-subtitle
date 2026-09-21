@@ -7,7 +7,7 @@ export interface LanguageOption {
 
 interface ControlsProps {
   supported: boolean;
-  listening: boolean;
+  running: boolean;
   micStatus: MicrophoneStatus;
   languages: LanguageOption[];
   lang: string;
@@ -24,11 +24,20 @@ interface ControlsProps {
   onShowHistoryChange: (value: boolean) => void;
   showVisualizer: boolean;
   onShowVisualizerChange: (value: boolean) => void;
+  showDebug: boolean;
+  onShowDebugChange: (value: boolean) => void;
 }
+
+const MIC_LABEL: Record<MicrophoneStatus, string> = {
+  idle: "マイク: 待機",
+  starting: "マイク: 起動中",
+  running: "マイク: 入力中",
+  error: "マイク: エラー",
+};
 
 export function Controls({
   supported,
-  listening,
+  running,
   micStatus,
   languages,
   lang,
@@ -45,24 +54,25 @@ export function Controls({
   onShowHistoryChange,
   showVisualizer,
   onShowVisualizerChange,
+  showDebug,
+  onShowDebugChange,
 }: ControlsProps) {
-  const busy = micStatus === "starting";
-  const label = busy ? "準備中…" : listening ? "■ 停止" : "● 開始";
-
   return (
     <div className="controls">
       <button
         type="button"
-        className={`btn btn-primary${listening ? " is-stop" : ""}`}
-        onClick={listening ? onStop : onStart}
-        disabled={!supported || busy}
+        className={`btn btn-primary${running ? " is-stop" : ""}`}
+        onClick={running ? onStop : onStart}
+        disabled={!supported}
       >
-        {label}
+        {running ? "■ 停止" : "● 開始"}
       </button>
 
       <button type="button" className="btn" onClick={onClear}>
         クリア
       </button>
+
+      <span className={`badge badge-${micStatus}`}>{MIC_LABEL[micStatus]}</span>
 
       <label className="field">
         <span className="field-label">言語</span>
@@ -118,6 +128,15 @@ export function Controls({
           onChange={(event) => onShowVisualizerChange(event.target.checked)}
         />
         <span>波形</span>
+      </label>
+
+      <label className="toggle">
+        <input
+          type="checkbox"
+          checked={showDebug}
+          onChange={(event) => onShowDebugChange(event.target.checked)}
+        />
+        <span>診断ログ</span>
       </label>
 
       <button type="button" className="btn" onClick={onToggleFullscreen}>
