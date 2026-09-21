@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Controls, type LanguageOption } from "./components/Controls";
 import { RecognitionLog } from "./components/RecognitionLog";
 import { SubtitleView } from "./components/SubtitleView";
@@ -53,6 +53,12 @@ export default function App() {
   const handleClear = useCallback(() => {
     recognition.clear();
   }, [recognition]);
+
+  const stopMicrophone = microphone.stop;
+
+  useEffect(() => {
+    if (!analyzeAudio) stopMicrophone();
+  }, [analyzeAudio, stopMicrophone]);
 
   const handleToggleFullscreen = useCallback(() => {
     const stage = stageRef.current;
